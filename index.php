@@ -120,7 +120,8 @@ if ( isset($_GET['search']) ) {
 <br>
 This is an AO light cidb aimed to provide Bebots !items command results.<br>
 It's based on frequently updated aorefs datas that Bebot also provides.<br>
-You'll need Apache/PHP + Bebot & its SQL database to make this work properly.<br><br>
+You'll need Apache/PHP + Bebot & its SQL DataBase to make this work properly.<br>
+Once your Bebot & Apache run fine, just edit credentials accordingly to DB.<br><br>
 The url passed values beyond ? can be the following :<br>
 _ search (<b>mandatory</b> url-encoded text that will be searched for)<br>
 _ ql (<i>optionnal</i> quality level digit from 1 to 300)<br>
