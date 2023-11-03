@@ -130,7 +130,7 @@ _ max (<i>optionnal</i> number of results, 50 by default & maximally)<br>
 _ icons (<i>optionnal</i> icons selection, false by default for pure text)<br>
 _ output (<i>optionnal</i> format, aoml by defaut but may request more support)<br>
 _ color_header, color_highlight, color_normal (<i>optionnal</i> text colors)<br>
-<h5>Coded by Bitnykk for Bebot.link</h5>
+<h5>Coded by Bitnykk for Bebot.link<br>Source github.com/bitnykk/ao-cidb-bebot</h5>
 	</center>";
 	
 }
