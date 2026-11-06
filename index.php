@@ -139,10 +139,15 @@ if ( isset($_GET['search']) ) {
 	$search = str_replace("''", "'", $search);
 	$search = str_replace('\"', "''", $search);
 	if ( $output == "aoml" ) {
-		echo "<a href=\"text://<font color=#".$color_header.">Found item(s) for '<font color=#".$color_highlight.">".$search."</font>' :</font><br><br><font color=#".$color_normal.">";
-		
+		echo "<a href=\"text://<font color=#".$color_header.">Found item(s) for '<font color=#".$color_highlight.">".$search."</font>' :</font><br><br>";
+		echo "<font color=#009900>High Relevance :</font><br><font color=#".$color_normal.">";
+		$low = false;
 		if($cnt==0) echo "No corresponding item was found ...<br>";
 		foreach($all AS $one => $val) {
+			if(!$low&&$val['relevance']<=1000) { 
+				$low = true;
+				echo "</font><font color=#999900>Low Relevance :</font><br><font color=#".$color_normal.">";	
+			}
 			if($icons) echo "<img src='rdb://".$val['icon']."'><br>";
 			$rep = str_replace('"', "''", $one);
 			echo $rep."<br>QL ";
