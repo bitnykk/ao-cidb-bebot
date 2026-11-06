@@ -113,6 +113,7 @@ if ( isset($_GET['search']) ) {
 		  $rql = $result['ql'];
 		  $ricon = $result['icon'];
 		  $rname = $result['name'];
+		  $rrel = $result['relevance'];
 		if ( !isset($all[$rname]) ) {
 			$all[$rname]['lowid'] = $rid;
 			$all[$rname]['highid'] = $rid;
@@ -120,6 +121,7 @@ if ( isset($_GET['search']) ) {
 			$all[$rname]['lowql'] = $rql;
 			$all[$rname]['highql'] = $rql;
 			$all[$rname]['icon'] = $ricon;
+			$all[$rname]['relevance'] = $rrel;
 		} else {
 			if($rql>$all[$rname]['ql']) {
 				$all[$rname]['highid'] = $rid;
@@ -129,6 +131,9 @@ if ( isset($_GET['search']) ) {
 				$all[$rname]['lowql'] = $rql;
 			}
 			$all[$rname]['ql'] = 0;
+			if($all[$rname]['relevance'] < $rrel) {
+				$all[$rname]['relevance'] = $rrel;
+			}
 		}
 	  }
 	  $results -> free_result();
