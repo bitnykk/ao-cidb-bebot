@@ -3,16 +3,14 @@
 if ( isset($_GET['search']) ) {
 	
 	// all variable initializing
-	$search = urldecode($_GET['search']);
-	$search = str_replace("'", "''", $search);
-	$search = str_replace('"', '\"', $search);
+	$search = trim(urldecode($_GET['search']));
 	if ( isset($_GET['ql']) && is_numeric($_GET['ql']) && $_GET['ql']>=0 && $_GET['ql']<=300  ) $ql = $_GET['ql'];
 	else $ql = 0;
 	if ( isset($_GET['output']) ) $output = $_GET['output'];
 	else $output = "aoml";	
 	if ( isset($_GET['bot']) ) $bot = $_GET['bot'];
 	else $bot = "Unknown";
-	if ( isset($_GET['max']) && is_numeric($_GET['max']) && $_GET['max']<51 & $_GET['max']>0 ) $max = $_GET['max'];
+	if ( isset($_GET['max']) && is_numeric($_GET['max']) && $_GET['max']<51 && $_GET['max']>0 ) $max = $_GET['max'];
 	else $max = 50;
 	if ( isset($_GET['icons']) ) $icons = $_GET['icons'];
 	else $icons = false;
@@ -31,20 +29,83 @@ if ( isset($_GET['search']) ) {
 	  exit();
 	}
 	
-	// search preparation & querying
-	$check = "SELECT COUNT(*) FROM aorefs WHERE name LIKE '%".$search."%'";
-	$number = $mysqli -> query($check);
-	$total = $number -> fetch_row();
-	if ($total[0]>0) {
-		$query = "SELECT * FROM aorefs WHERE name LIKE '%".$search."%' LIMIT ".$max;
-	} else {
-		$keywords = explode(" ", $search);
-		$like = "name LIKE '%".$search."%'";
-		foreach($keywords as $keyword) {
-			$like = $like." OR name LIKE '%".$keyword."%'";
-		}
-		$query = "SELECT * FROM aorefs WHERE ".$like." LIMIT ".$max;
+	// search preparation & querying + weighting
+	$search = trim(urldecode($_GET['search']));
+
+	$keywords = preg_split('/\s+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+	$keywords = array_values(array_unique($keywords));
+
+	$where = array();
+	$score = array();
+	$params = array();
+
+	// full phrasing
+	$where[] = "name LIKE '%".$mysqli->real_escape_string($search)."%'";
+
+	// exact name
+	$escapedSearch = $mysqli->real_escape_string($search);
+	$score[] = "
+		CASE
+			WHEN LOWER(name) = LOWER('".$escapedSearch."')
+			THEN 10000
+			ELSE 0
+		END
+	";
+
+	// expression appearance
+	$score[] = "
+		CASE
+			WHEN name LIKE '%".$escapedSearch."%'
+			THEN 3000
+			ELSE 0
+		END
+	";
+
+	// individual word(s) scoring
+	foreach ($keywords as $keyword) {
+		$keyword = $mysqli->real_escape_string($keyword);
+
+		$where[] = "name LIKE '%".$keyword."%'";
+
+		$score[] = "
+			CASE
+				WHEN name LIKE '%".$keyword."%'
+				THEN 1000
+				ELSE 0
+			END
+		";
 	}
+
+	// all words bonus
+	if (count($keywords) > 1) {
+		$allWords = array();
+
+		foreach ($keywords as $keyword) {
+			$keyword = $mysqli->real_escape_string($keyword);
+			$allWords[] = "name LIKE '%".$keyword."%'";
+		}
+
+		$score[] = "
+			CASE
+				WHEN ".implode(" AND ", $allWords)."
+				THEN 5000
+				ELSE 0
+			END
+		";
+	}
+	
+	// final query
+	$query = "
+		SELECT *,
+			   (".implode(" + ", $score).") AS relevance
+		FROM aorefs
+		WHERE ".implode(" OR ", $where)."
+		ORDER BY relevance DESC,
+				 CHAR_LENGTH(name) ASC,
+				 name ASC,
+				 ql ASC
+		LIMIT ".$max;
+	
 	if ($results = $mysqli -> query($query)) {
 		$all = array();
 	  foreach($results AS $result) {

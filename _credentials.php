@@ -2,8 +2,8 @@
 
 // edit values in "quotes"
 $srv = "localhost";
-$uzr = "username";
-$pwd = "password";
-$dbn = "database";
+$uzr = "BiTT_0rgZ_StUff";
+$pwd = "pazz4_cOd3_FRorgs";
+$dbn = "BOT_codebots";
 
 ?>
